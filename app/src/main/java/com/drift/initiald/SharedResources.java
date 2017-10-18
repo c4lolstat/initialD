@@ -25,6 +25,12 @@ public class SharedResources {
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>());
     private boolean sendBufferEmpty;
+    private boolean receiveBufferEmpty;
+
+
+    public boolean isReceiveBufferFull(){
+        return receiveBuffer.remainingCapacity() == 0;
+    }
 
     private SharedResources(){}
 
@@ -76,5 +82,23 @@ public class SharedResources {
 
     public void executeThread(Runnable runnable) {
         THREAD_POOL.execute(runnable);
+    }
+
+    public void offerForReceiveBuffer(int read) {
+        receiveBuffer.offer(read);
+    }
+
+    public boolean isReceiveBufferEmpty() {
+        return receiveBuffer.isEmpty();
+    }
+
+    public Integer takeFromReceiveBuffer() {
+        Integer element = null;
+        try {
+            element = receiveBuffer.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return element;
     }
 }

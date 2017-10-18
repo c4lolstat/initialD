@@ -27,6 +27,8 @@ public class ConnectHandler implements CompoundButton.OnCheckedChangeListener{
             resources.executeThread(btComm);
             compoundButton.setChecked(true);
         }else{
+            resources.clearSendBuffer();
+            resources.clearReceiveBuffer();
             resources.setRun(false);
             compoundButton.setChecked(false);
         }

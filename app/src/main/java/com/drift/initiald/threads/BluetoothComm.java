@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import com.drift.initiald.SharedResources;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public class BluetoothComm implements Runnable {
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private OutputStream os = null;
+    private InputStream is = null;
     private SharedResources resources;
 
     public BluetoothComm(SharedResources resources) {
@@ -37,6 +39,7 @@ public class BluetoothComm implements Runnable {
             socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_STRING));
             socket.connect();
             os = socket.getOutputStream();
+            is = socket.getInputStream();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,10 +55,21 @@ public class BluetoothComm implements Runnable {
                 if (!resources.isSendBufferEmpty()){
                     try {
                         os.write(resources.takeFromSendBuffer());
-                        Thread.sleep(10);
-                    } catch (InterruptedException | IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+                if (!resources.isReceiveBufferFull()){
+                    try {
+                        resources.offerForReceiveBuffer(is.read());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
             try {
